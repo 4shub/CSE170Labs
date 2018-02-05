@@ -1,0 +1,9 @@
+sig
+sig/**/*
+sig/*
+*.zip
+obj/**/*
+obj/*
+obj
+*.exe
+.vs

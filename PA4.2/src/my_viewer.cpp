@@ -157,24 +157,40 @@ void MyViewer::run_animation ()
 	if ( _animating ) return; // avoid recursive calls
 	_animating = true;
 	
-	int ind = gs_random ( 0, rootg()->size()-1 ); // pick one child
-	SnManipulator* manip = rootg()->get<SnManipulator>(ind); // access one of the manipulators
-	GsMat m = manip->mat();
+	float animationMovements[] = { 20, 10, 30, 20, 10, 20, -20, -10, -30, -20, -10, -20, -20, -10, -30, -20, -10, -20, 20, 10, 30, 20 };
+	int animationIndex[] = { 1, 0, 1, 2, 1, 0, 1, 0, 1, 2, 1, 0, 1, 0, 1, 2, 1, 0, 1, 0, 1, 2, 1, 0, -1 };
 
-	double frdt = 1.0/30.0; // delta time to reach given number of frames per second
-	double v = 4; // target velocity is 1 unit per second
-	double t=0, lt=0, t0=gs_time();
-	do // run for a while:
-	{	while ( t-lt<frdt ) { ws_check(); t=gs_time()-t0; } // wait until it is time for next frame
-		double yinc = (t-lt)*v;
-		if ( t>2 ) yinc=-yinc; // after 2 secs: go down
-		lt = t;
-		m.e24 += (float)yinc;
-		if ( m.e24<0 ) m.e24=0; // make sure it does not go below 0
-		manip->initial_mat ( m );
-		render(); // notify it needs redraw
+	const float timer = 100; // 1 second
+	int index = 0;
+	do {
+		gs_sleep(int(timer));
+
+		int indexToMove = animationIndex[index];
+		
+		switch (indexToMove) {
+		case 2: { 
+			rupperarmRotation += animationMovements[index];
+			break; 
+		}
+		case 1: {
+			rlowerarmRotation += animationMovements[index];
+			break;
+		}
+		case 0: {
+			rhandRotation += animationMovements[index];
+			break;
+		}
+		}
+		
+		rotatePart(2, rupperarmRotation);
+		movePart(1, rupperarmRotation);
+		rotatePart(1, rlowerarmRotation);
+		movePart(0, rlowerarmRotation);
+		rotatePart(0, rhandRotation);
+
 		ws_check(); // redraw now
-	}	while ( m.e24>0 );
+		index++;
+	} while (animationIndex[index] != -1);
 	_animating = false;
 }
 
